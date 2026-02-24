@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portfolio</title>
+  <title>Portfolio — Hitesh</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
   <section class="hero">
+
     <div class="sky-container">
       <img src="cloud1.jpg" alt="Clouds" />
     </div>
@@ -23,11 +24,113 @@
     </div>
 
     <div class="hero-header">
-      <div class="col">
-        <h2>My Work</h2>
+      <div class="col"><h2>My Work</h2></div>
+      <div class="col"><h2>Portfolio</h2></div>
+    </div>
+
+    <!-- ─── PANEL 1: INTRO ──────────────────────────── -->
+    <div class="cloud-panel" id="panel-intro">
+      <div class="panel-inner">
+        <p class="panel-eyebrow">Hello there</p>
+        <h2 class="panel-name">I'm Hitesh.</h2>
+        <p class="panel-bio">
+          [ A short bio about yourself — what you do, what drives you,
+          what kind of work you love. Keep it human, keep it honest. ]
+        </p>
       </div>
-      <div class="col">
-        <h2>Portfolio</h2>
+    </div>
+
+    <!-- ─── PANEL 2: EDUCATION ──────────────────────── -->
+    <div class="cloud-panel" id="panel-education">
+      <div class="panel-inner">
+        <p class="panel-eyebrow">Education</p>
+        <div class="timeline">
+
+          <div class="timeline__item">
+            <div class="timeline__dot"></div>
+            <div class="timeline__body">
+              <span class="timeline__year">2020 — 2024</span>
+              <h3 class="timeline__title">[ Undergraduate Degree ]</h3>
+              <p class="timeline__school">[ University Name ] · [ City ]</p>
+              <p class="timeline__detail">[ Course / Major ] — [ Notable achievement ]</p>
+            </div>
+          </div>
+
+          <div class="timeline__item">
+            <div class="timeline__dot"></div>
+            <div class="timeline__body">
+              <span class="timeline__year">Until 2020</span>
+              <h3 class="timeline__title">[ School Name ]</h3>
+              <p class="timeline__school">[ City ] · High School</p>
+              <p class="timeline__detail">[ Stream — Science / Commerce / Arts ]</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── PANEL 3: RESUME ─────────────────────────── -->
+    <div class="cloud-panel" id="panel-resume">
+      <div class="panel-inner">
+        <p class="panel-eyebrow">Want the full picture?</p>
+        <a class="resume-card" href="resume.pdf" target="_blank" rel="noopener">
+          <span class="resume-card__label">Résumé</span>
+          <span class="resume-card__arrow">↗</span>
+        </a>
+        <p class="resume-card__hint">Opens as PDF</p>
+      </div>
+    </div>
+
+  </section>
+
+<!-- ═══ GITHUB ACTIVITY ════════════════════════════════════ -->
+  <section class="github-section">
+    <div class="github-inner">
+
+      <div class="github-header">
+        <p class="github-eyebrow">Open Source</p>
+        <h2 class="github-title">On GitHub</h2>
+        <a class="github-profile-link" href="https://github.com/H-strangeone" target="_blank" rel="noopener">
+          @H-strangeone ↗
+        </a>
+      </div>
+
+      <div class="github-content">
+
+        <!-- Full-width contribution chart -->
+        <div class="github-graph">
+          <img
+            src="https://ghchart.rshah.org/H-strangeone"
+            alt="GitHub contribution graph"
+            class="github-graph__img"
+          />
+          <p class="github-graph__label">Contribution activity · last 12 months</p>
+        </div>
+
+        <!-- Stats + top languages side by side -->
+        <div class="github-stats">
+          <div class="github-stat-card">
+            <img
+              src="https://github-readme-stats.vercel.app/api?username=H-strangeone&show_icons=true&hide_border=true&bg_color=0f0f0f&title_color=e3e3db&text_color=e3e3db&icon_color=e3e3db&ring_color=e3e3db"
+              alt="GitHub stats"
+            />
+          </div>
+          <div class="github-stat-card">
+            <img
+              src="https://github-readme-stats.vercel.app/api/top-langs/?username=H-strangeone&layout=compact&hide_border=true&bg_color=0f0f0f&title_color=e3e3db&text_color=e3e3db&langs_count=8&count_private=true&exclude_repo=github-readme-stats"
+              alt="Top languages"
+            />
+          </div>
+        </div>
+
+      </div>
+          </a>
+            </div>
+            </div>
+          </a>
+        </div>
+
       </div>
     </div>
   </section>

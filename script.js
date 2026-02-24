@@ -5,7 +5,8 @@
 // gsap.registerPlugin(ScrollTrigger);
 
 // document.addEventListener("DOMContentLoaded", () => {
-//     // Initialize Lenis with proper RAF loop
+
+//     // ─── LENIS ────────────────────────────────────────────────
 //     const lenis = new Lenis({
 //         duration: 1.2,
 //         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -17,201 +18,148 @@
 //         requestAnimationFrame(raf);
 //     }
 //     requestAnimationFrame(raf);
-
 //     lenis.on("scroll", ScrollTrigger.update);
 
+//     // ─── DOM REFS ─────────────────────────────────────────────
 //     const windowContainer = document.querySelector(".window-container");
-//     const skyContainer = document.querySelector(".sky-container");
-//     const heroHeader = document.querySelector(".hero-header");
-//     const heroCopy = document.querySelector(".hero-copy");
+//     const skyContainer    = document.querySelector(".sky-container");
+//     const heroHeader      = document.querySelector(".hero-header");
+//     const heroCopy        = document.querySelector(".hero-copy");
+
+//     const panelIntro      = document.getElementById("panel-intro");
+//     const panelEducation  = document.getElementById("panel-education");
+//     const panelResume     = document.getElementById("panel-resume");
+
 //     const skyContainerHeight = skyContainer.offsetHeight;
-//     const viewportHeight = window.innerHeight;
-//     const skyMoveDistance = skyContainerHeight - viewportHeight;
+//     const viewportHeight     = window.innerHeight;
+//     const skyMoveDistance    = skyContainerHeight - viewportHeight;
 
-//     // Initial states
-//     gsap.set(heroCopy, { yPercent: 100, opacity: 0 });
+//     // ─── INITIAL STATES ───────────────────────────────────────
+//     gsap.set(heroCopy,        { yPercent: 100, opacity: 0 });
 //     gsap.set(windowContainer, { scale: 1 });
-
-//     ScrollTrigger.create({
-//         trigger: ".hero",
-//         start: "top top",
-//         end: `+=${window.innerHeight * 3}px`,
-//         pin: true,
-//         pinSpacing: true,
-//         scrub: 1.5,
-//         onUpdate: (self) => {
-//             const progress = self.progress;
-            
-//             // Window scaling and fading
-//             let windowScale;
-//             let windowOpacity;
-            
-//             if (progress < 0.4) {
-//                 // Scale up from 1 to 6
-//                 windowScale = gsap.utils.mapRange(0, 0.4, 1, 6, progress);
-//                 windowOpacity = 1;
-//             } else if (progress < 0.7) {
-//                 // Hold at 6x scale
-//                 windowScale = 6;
-//                 windowOpacity = 1;
-//             } else {
-//                 // Fade out completely (don't scale down, just fade)
-//                 windowScale = 6;
-//                 windowOpacity = gsap.utils.mapRange(0.7, 0.9, 1, 0, progress);
-//             }
-            
-//             gsap.set(windowContainer, { 
-//                 scale: windowScale, 
-//                 opacity: windowOpacity 
-//             });
-
-//             // Hero header scaling and fading
-//             let headerOpacity;
-//             if (progress < 0.6) {
-//                 headerOpacity = 1;
-//             } else {
-//                 headerOpacity = gsap.utils.mapRange(0.6, 0.8, 1, 0, progress);
-//             }
-            
-//             gsap.set(heroHeader, { 
-//                 scale: windowScale, 
-//                 z: progress * 500,
-//                 opacity: headerOpacity
-//             });
-
-//             // Sky movement - increase multiplier to ensure full visibility
-//             gsap.set(skyContainer, { 
-//                 y: -skyMoveDistance * progress * 1.3 
-//             });
-
-//             // Hero copy appears in final third
-//             let heroCopyY;
-//             let heroCopyOpacity;
-            
-//             if (progress < 0.66) {
-//                 heroCopyY = 100;
-//                 heroCopyOpacity = 0;
-//             } else if (progress >= 1) {
-//                 heroCopyY = 0;
-//                 heroCopyOpacity = 1;
-//             } else {
-//                 const copyProgress = (progress - 0.66) / 0.34;
-//                 heroCopyY = 100 * (1 - copyProgress);
-//                 heroCopyOpacity = copyProgress;
-//             }
-            
-//             gsap.set(heroCopy, { 
-//                 yPercent: heroCopyY, 
-//                 opacity: heroCopyOpacity 
-//             });
-//         },
-//     });
-// });
-// import gsap from "gsap";
-// import { ScrollTrigger } from "gsap/ScrollTrigger";
-// import Lenis from "@studio-freight/lenis";
-
-// gsap.registerPlugin(ScrollTrigger);
-
-// document.addEventListener("DOMContentLoaded", () => {
-//     // Initialize Lenis with proper RAF loop
-//     const lenis = new Lenis({
-//         duration: 1.2,
-//         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-//         smooth: true
+//     gsap.set([panelIntro, panelEducation, panelResume], {
+//         opacity: 0,
+//         y: 60,
+//         pointerEvents: "none"
 //     });
 
-//     function raf(time) {
-//         lenis.raf(time);
-//         requestAnimationFrame(raf);
+//     // ─── HELPERS ──────────────────────────────────────────────
+//     const clamp01 = (v) => Math.min(1, Math.max(0, v));
+//     const norm    = (v, min, max) => clamp01((v - min) / (max - min));
+//     const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+//     const easeIn  = (t) => t * t;
+
+//     // inStart→inEnd   : fades + rises in   (interactive once opacity > 0.05)
+//     // inEnd→outStart  : fully visible
+//     // outStart→outEnd : fades + rises out
+//     function drivePanel(el, p, inStart, inEnd, outStart, outEnd) {
+//         let opacity, y;
+
+//         if (p < inStart) {
+//             opacity = 0;  y = 60;
+//         } else if (p < inEnd) {
+//             const t = easeOut(norm(p, inStart, inEnd));
+//             opacity = t;  y = 60 * (1 - t);
+//         } else if (p < outStart) {
+//             opacity = 1;  y = 0;
+//         } else if (p < outEnd) {
+//             const t = easeIn(norm(p, outStart, outEnd));
+//             opacity = 1 - t;  y = -40 * t;
+//         } else {
+//             opacity = 0;  y = -40;
+//         }
+
+//         gsap.set(el, {
+//             opacity,
+//             y,
+//             pointerEvents: opacity > 0.05 ? "auto" : "none"
+//         });
 //     }
-//     requestAnimationFrame(raf);
 
-//     lenis.on("scroll", ScrollTrigger.update);
-
-//     const windowContainer = document.querySelector(".window-container");
-//     const skyContainer = document.querySelector(".sky-container");
-//     const heroHeader = document.querySelector(".hero-header");
-//     const heroCopy = document.querySelector(".hero-copy");
-//     const skyContainerHeight = skyContainer.offsetHeight;
-//     const viewportHeight = window.innerHeight;
-//     const skyMoveDistance = skyContainerHeight - viewportHeight;
-
-//     // Initial states
-//     gsap.set(heroCopy, { yPercent: 100, opacity: 0 });
-//     gsap.set(windowContainer, { scale: 1 });
+//     // ─── SCROLL TRIGGER ───────────────────────────────────────
+//     // Extended to 7× viewport to fit 3 panels between window-out and hero-copy.
+//     //
+//     // PROGRESS MAP  (0 → 1  over  7 × viewport height)
+//     // ──────────────────────────────────────────────────
+//     // 0.00 → 0.17   window zooms in  1→12
+//     // 0.17 → 0.21   window holds at 12×
+//     // 0.21 → 0.28   window fades out, clouds fully visible
+//     // 0.28 → 0.44   Panel 1 · Intro
+//     // 0.44 → 0.60   Panel 2 · Education
+//     // 0.60 → 0.76   Panel 3 · Resume
+//     // 0.76 → 1.00   hero-copy rises in
 
 //     ScrollTrigger.create({
 //         trigger: ".hero",
 //         start: "top top",
-//         end: `+=${window.innerHeight * 3}px`,
+//         end: `+=${window.innerHeight * 7}px`,
 //         pin: true,
 //         pinSpacing: true,
 //         scrub: 1.5,
 //         onUpdate: (self) => {
 //             const progress = self.progress;
-            
-//             // Window scaling and fading
-//             let windowScale;
-//             let windowOpacity;
-            
-//             if (progress < 0.4) {
-//                 // Scale up from 1 to 6
-//                 windowScale = gsap.utils.mapRange(0, 0.4, 1, 6, progress);
+
+//             // ── Window scaling + fading ───────────────────────────
+//             let windowScale, windowOpacity;
+
+//             if (progress < 0.17) {
+//                 windowScale   = gsap.utils.mapRange(0, 0.17, 1, 12, progress);
 //                 windowOpacity = 1;
-//             } else if (progress < 0.5) {
-//                 // Hold at 6x scale briefly
-//                 windowScale = 6;
+//             } else if (progress < 0.21) {
+//                 windowScale   = 12;
 //                 windowOpacity = 1;
 //             } else {
-//                 // Fade out completely as clouds become visible
-//                 windowScale = 6;
-//                 windowOpacity = gsap.utils.mapRange(0.5, 0.65, 1, 0, progress);
+//                 windowScale   = 12;
+//                 windowOpacity = gsap.utils.mapRange(0.21, 0.28, 1, 0, progress);
 //             }
-            
-//             gsap.set(windowContainer, { 
-//                 scale: windowScale, 
-//                 opacity: windowOpacity 
+
+//             gsap.set(windowContainer, {
+//                 scale:   windowScale,
+//                 opacity: windowOpacity
 //             });
 
-//             // Hero header scaling and fading
+//             // ── Hero header ───────────────────────────────────────
 //             let headerOpacity;
-//             if (progress < 0.5) {
+//             if (progress < 0.21) {
 //                 headerOpacity = 1;
 //             } else {
-//                 headerOpacity = gsap.utils.mapRange(0.5, 0.65, 1, 0, progress);
+//                 headerOpacity = gsap.utils.mapRange(0.21, 0.28, 1, 0, progress);
 //             }
-            
-//             gsap.set(heroHeader, { 
-//                 scale: windowScale, 
-//                 z: progress * 500,
+
+//             gsap.set(heroHeader, {
+//                 scale:   windowScale,
+//                 z:       progress * 500,
 //                 opacity: headerOpacity
 //             });
 
-//             // Sky movement - increase multiplier to ensure full visibility
-//             gsap.set(skyContainer, { 
-//                 y: -skyMoveDistance * progress * 1.3 
+//             // ── Sky movement (original 1.3 multiplier kept) ───────
+//             gsap.set(skyContainer, {
+//                 y: -skyMoveDistance * progress * 1.3
 //             });
 
-//             // Hero copy appears in final third
-//             let heroCopyY;
-//             let heroCopyOpacity;
-            
-//             if (progress < 0.66) {
-//                 heroCopyY = 100;
+//             // ── Panels over clouds ────────────────────────────────
+//             drivePanel(panelIntro,     progress, 0.28, 0.36, 0.40, 0.44);
+//             drivePanel(panelEducation, progress, 0.44, 0.52, 0.56, 0.60);
+//             drivePanel(panelResume,    progress, 0.60, 0.68, 0.72, 0.76);
+
+//             // ── Hero copy — final stretch ─────────────────────────
+//             let heroCopyY, heroCopyOpacity;
+
+//             if (progress < 0.76) {
+//                 heroCopyY       = 100;
 //                 heroCopyOpacity = 0;
 //             } else if (progress >= 1) {
-//                 heroCopyY = 0;
+//                 heroCopyY       = 0;
 //                 heroCopyOpacity = 1;
 //             } else {
-//                 const copyProgress = (progress - 0.66) / 0.34;
-//                 heroCopyY = 100 * (1 - copyProgress);
-//                 heroCopyOpacity = copyProgress;
+//                 const t   = (progress - 0.76) / 0.24;
+//                 heroCopyY       = 100 * (1 - t);
+//                 heroCopyOpacity = t;
 //             }
-            
-//             gsap.set(heroCopy, { 
-//                 yPercent: heroCopyY, 
-//                 opacity: heroCopyOpacity 
+
+//             gsap.set(heroCopy, {
+//                 yPercent: heroCopyY,
+//                 opacity:  heroCopyOpacity
 //             });
 //         },
 //     });
@@ -223,7 +171,8 @@ import Lenis from "@studio-freight/lenis";
 gsap.registerPlugin(ScrollTrigger);
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Initialize Lenis with proper RAF loop
+
+    // ─── LENIS ────────────────────────────────────────────────
     const lenis = new Lenis({
         duration: 1.2,
         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -235,93 +184,172 @@ document.addEventListener("DOMContentLoaded", () => {
         requestAnimationFrame(raf);
     }
     requestAnimationFrame(raf);
-
     lenis.on("scroll", ScrollTrigger.update);
 
+    // ─── DOM REFS ─────────────────────────────────────────────
     const windowContainer = document.querySelector(".window-container");
-    const skyContainer = document.querySelector(".sky-container");
-    const heroHeader = document.querySelector(".hero-header");
-    const heroCopy = document.querySelector(".hero-copy");
-    const skyContainerHeight = skyContainer.offsetHeight;
-    const viewportHeight = window.innerHeight;
-    const skyMoveDistance = skyContainerHeight - viewportHeight;
+    const skyContainer    = document.querySelector(".sky-container");
+    const heroHeader      = document.querySelector(".hero-header");
+    const heroCopy        = document.querySelector(".hero-copy");
 
-    // Initial states
-    gsap.set(heroCopy, { yPercent: 100, opacity: 0 });
+    const panelIntro      = document.getElementById("panel-intro");
+    const panelEducation  = document.getElementById("panel-education");
+    const panelResume     = document.getElementById("panel-resume");
+
+    const skyContainerHeight = skyContainer.offsetHeight;
+    const viewportHeight     = window.innerHeight;
+    const skyMoveDistance    = skyContainerHeight - viewportHeight;
+
+    // ─── INITIAL STATES ───────────────────────────────────────
+    gsap.set(heroCopy,        { yPercent: 100, opacity: 0 });
     gsap.set(windowContainer, { scale: 1 });
+    gsap.set([panelIntro, panelEducation, panelResume], {
+        opacity: 0,
+        y: 60,
+        pointerEvents: "none"
+    });
+
+    // ─── HELPERS ──────────────────────────────────────────────
+    const clamp01 = (v) => Math.min(1, Math.max(0, v));
+    const norm    = (v, min, max) => clamp01((v - min) / (max - min));
+    const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+    const easeIn  = (t) => t * t;
+
+    // inStart→inEnd   : fades + rises in   (interactive once opacity > 0.05)
+    // inEnd→outStart  : fully visible
+    // outStart→outEnd : fades + rises out
+    function drivePanel(el, p, inStart, inEnd, outStart, outEnd) {
+        let opacity, y;
+
+        if (p < inStart) {
+            opacity = 0;  y = 60;
+        } else if (p < inEnd) {
+            const t = easeOut(norm(p, inStart, inEnd));
+            opacity = t;  y = 60 * (1 - t);
+        } else if (p < outStart) {
+            opacity = 1;  y = 0;
+        } else if (p < outEnd) {
+            const t = easeIn(norm(p, outStart, outEnd));
+            opacity = 1 - t;  y = -40 * t;
+        } else {
+            opacity = 0;  y = -40;
+        }
+
+        gsap.set(el, {
+            opacity,
+            y,
+            pointerEvents: opacity > 0.05 ? "auto" : "none"
+        });
+    }
+
+    // ─── SCROLL TRIGGER ───────────────────────────────────────
+    // Extended to 7× viewport to fit 3 panels between window-out and hero-copy.
+    //
+    // PROGRESS MAP  (0 → 1  over  7 × viewport height)
+    // ──────────────────────────────────────────────────
+    // 0.00 → 0.17   window zooms in  1→12
+    // 0.17 → 0.21   window holds at 12×
+    // 0.21 → 0.28   window fades out, clouds fully visible
+    // 0.28 → 0.44   Panel 1 · Intro
+    // 0.44 → 0.60   Panel 2 · Education
+    // 0.60 → 0.76   Panel 3 · Resume
+    // 0.76 → 1.00   hero-copy rises in
 
     ScrollTrigger.create({
         trigger: ".hero",
         start: "top top",
-        end: `+=${window.innerHeight * 3}px`,
+        end: `+=${window.innerHeight * 7}px`,
         pin: true,
         pinSpacing: true,
         scrub: 1.5,
         onUpdate: (self) => {
             const progress = self.progress;
-            
-            // Window scaling and fading
-            let windowScale;
-            let windowOpacity;
-            
-            if (progress < 0.4) {
-                // Scale up from 1 to 12 (large enough to cover entire screen)
-                windowScale = gsap.utils.mapRange(0, 0.4, 1, 12, progress);
+
+            // ── Window scaling + fading ───────────────────────────
+            let windowScale, windowOpacity;
+
+            if (progress < 0.17) {
+                windowScale   = gsap.utils.mapRange(0, 0.17, 1, 12, progress);
                 windowOpacity = 1;
-            } else if (progress < 0.5) {
-                // Hold at 12x scale briefly
-                windowScale = 12;
+            } else if (progress < 0.21) {
+                windowScale   = 12;
                 windowOpacity = 1;
             } else {
-                // Fade out completely as clouds become visible
-                windowScale = 12;
-                windowOpacity = gsap.utils.mapRange(0.5, 0.65, 1, 0, progress);
+                windowScale   = 12;
+                windowOpacity = gsap.utils.mapRange(0.21, 0.28, 1, 0, progress);
             }
-            
-            gsap.set(windowContainer, { 
-                scale: windowScale, 
-                opacity: windowOpacity 
+
+            gsap.set(windowContainer, {
+                scale:   windowScale,
+                opacity: windowOpacity
             });
 
-            // Hero header scaling and fading
+            // ── Hero header ───────────────────────────────────────
             let headerOpacity;
-            if (progress < 0.5) {
+            if (progress < 0.21) {
                 headerOpacity = 1;
             } else {
-                headerOpacity = gsap.utils.mapRange(0.5, 0.65, 1, 0, progress);
+                headerOpacity = gsap.utils.mapRange(0.21, 0.28, 1, 0, progress);
             }
-            
-            gsap.set(heroHeader, { 
-                scale: windowScale, 
-                z: progress * 500,
+
+            gsap.set(heroHeader, {
+                scale:   windowScale,
+                z:       progress * 500,
                 opacity: headerOpacity
             });
 
-            // Sky movement - increase multiplier to ensure full visibility
-            gsap.set(skyContainer, { 
-                y: -skyMoveDistance * progress * 1.3 
+            // ── Sky movement (original 1.3 multiplier kept) ───────
+            gsap.set(skyContainer, {
+                y: -skyMoveDistance * progress * 1.3
             });
 
-            // Hero copy appears in final third
-            let heroCopyY;
-            let heroCopyOpacity;
-            
-            if (progress < 0.66) {
-                heroCopyY = 100;
+            // ── Panels over clouds ────────────────────────────────
+            // Intro starts at 0.24 — just as the window finishes fading
+            drivePanel(panelIntro,     progress, 0.24, 0.31, 0.35, 0.40);
+            drivePanel(panelEducation, progress, 0.40, 0.47, 0.52, 0.57);
+            drivePanel(panelResume,    progress, 0.57, 0.64, 0.68, 0.73);
+
+            // ── Hero copy — final stretch ─────────────────────────
+            let heroCopyY, heroCopyOpacity;
+
+            if (progress < 0.73) {
+                heroCopyY       = 100;
                 heroCopyOpacity = 0;
             } else if (progress >= 1) {
-                heroCopyY = 0;
+                heroCopyY       = 0;
                 heroCopyOpacity = 1;
             } else {
-                const copyProgress = (progress - 0.66) / 0.34;
-                heroCopyY = 100 * (1 - copyProgress);
-                heroCopyOpacity = copyProgress;
+                const t   = (progress - 0.73) / 0.27;
+                heroCopyY       = 100 * (1 - t);
+                heroCopyOpacity = t;
             }
-            
-            gsap.set(heroCopy, { 
-                yPercent: heroCopyY, 
-                opacity: heroCopyOpacity 
+
+            gsap.set(heroCopy, {
+                yPercent: heroCopyY,
+                opacity:  heroCopyOpacity
             });
         },
     });
 });
+
+// ─── GITHUB SECTION SCROLL-IN ─────────────────────────────
+// Each direct child of .github-inner fades up when it enters the viewport
+const githubChildren = document.querySelectorAll(".github-inner > *");
+if (githubChildren.length) {
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    // Stagger based on sibling index
+                    const index = [...githubChildren].indexOf(entry.target);
+                    setTimeout(() => {
+                        entry.target.classList.add("is-visible");
+                    }, index * 120);
+                    observer.unobserve(entry.target);
+                }
+            });
+        },
+        { threshold: 0.1 }
+    );
+    githubChildren.forEach((el) => observer.observe(el));
+}
