@@ -7,10 +7,13 @@ gsap.registerPlugin(ScrollTrigger);
 document.addEventListener("DOMContentLoaded", () => {
 
     // ─── LENIS ────────────────────────────────────────────────
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
     const lenis = new Lenis({
-        duration: 1.2,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        smooth: true
+    duration: isMobile ? 0.6 : 1.2,
+    smooth: !isMobile,
+    smoothTouch: true,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     });
 
     function raf(time) {
@@ -31,7 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const panelResume     = document.getElementById("panel-resume");
 
     const skyContainerHeight = skyContainer.offsetHeight;
-    const viewportHeight     = window.innerHeight;
+    const viewportHeight =
+  window.visualViewport?.height || window.innerHeight;
     const skyMoveDistance    = skyContainerHeight - viewportHeight;
 
     // ─── INITIAL STATES ───────────────────────────────────────
@@ -88,11 +92,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // 0.44 → 0.60   Panel 2 · Education
     // 0.60 → 0.76   Panel 3 · Resume
     // 0.76 → 1.00   hero-copy rises in
-
     ScrollTrigger.create({
         trigger: ".hero",
         start: "top top",
-        end: `+=${window.innerHeight * 5.5}px`,
+        end: `+=${window.innerHeight * (isMobile ? 3.5 : 5.5)}px`,
         pin: true,
         pinSpacing: true,
         scrub: 1.5,

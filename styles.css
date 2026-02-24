@@ -373,6 +373,9 @@ p { font-size: 1.35rem; line-height: 1; }
   .platform-links   { grid-template-columns: 1fr; }
   .github-stats     { flex-direction: column; }
   .github-section   { padding: 3rem 5vw; }
+  .hero {
+    perspective: none;
+  }
 }
 
 /* Platform card text placeholder (shown when no screenshot image is set) */
