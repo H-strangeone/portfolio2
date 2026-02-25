@@ -20,7 +20,12 @@
     </div>
 
     <div class="hero-header">
-      <div class="col"><h2>My Work</h2></div>
+      <div class="col">
+        <button class="contact-trigger">
+          <span class="contact-trigger__icon"></span>
+          <span class="contact-trigger__label">Contact Me</span>
+        </button>
+      </div>
       <div class="col"><h2>Portfolio</h2></div>
     </div>
 
@@ -30,8 +35,7 @@
         <p class="panel-eyebrow">Hello there</p>
         <h2 class="panel-name">I'm Hitesh.</h2>
         <p class="panel-bio">
-          [ A short bio about yourself — what you do, what drives you,
-          what kind of work you love. Keep it human, keep it honest. ]
+          bio i will add
         </p>
       </div>
     </div>
@@ -45,13 +49,22 @@
           <div class="timeline__item">
             <div class="timeline__dot"></div>
             <div class="timeline__body">
-              <span class="timeline__year">2020 — 2024</span>
-              <h3 class="timeline__title">[ Undergraduate Degree ]</h3>
+              <span class="timeline__year"><b>2022 — 2026</b></span>
+              <h3 class="timeline__title"><B class="Tech">B.Tech </h3>
               <p class="timeline__school">[ University Name ] · [ City ]</p>
               <p class="timeline__detail">[ Course / Major ] — [ Notable achievement ]</p>
             </div>
           </div>
 
+          <div class="timeline__item">
+            <div class="timeline__dot"></div>
+            <div class="timeline__body">
+              <span class="timeline__year">Until 2020</span>
+              <h3 class="timeline__title">[ School Name ]</h3>
+              <p class="timeline__school">[ City ] · High School</p>
+              <p class="timeline__detail">[ Stream — Science / Commerce / Arts ]</p>
+            </div>
+          </div>
           <div class="timeline__item">
             <div class="timeline__dot"></div>
             <div class="timeline__body">
@@ -149,16 +162,70 @@
     </div>
   </section>
 
-  <section class="projects">
+  <!-- <section class="projects-intro">
   <div class="projects-inner">
     <p class="projects-eyebrow">Selected Work</p>
     <h2 class="projects-title">Projects</h2>
-
-    <!-- Three.js canvas mounts here later -->
-    <div id="projects-canvas"></div>
+    <p class="projects-desc">
+      Experiments, visuals, and interactive systems.
+    </p>
   </div>
+</section> -->
+
+<section class="three-outro">
+
+  <!-- LEFT ARROW -->
+  <button id="arrow-left" class="three-arrow left" aria-label="Previous project">
+    <img src="/ui/arrow-left.png" alt="" />
+  </button>
+
+  <!-- THREE.JS CANVAS -->
+  <div id="three-container"></div>
+
+  <!-- RIGHT ARROW -->
+  <button id="arrow-right" class="three-arrow right" aria-label="Next project">
+    <img src="/ui/arrow-right.png" alt="" />
+  </button>
+
 </section>
 
   <script type="module" src="script.js"></script>
+  <div class="contact-modal" aria-hidden="true">
+  <div class="contact-backdrop"></div>
+
+  <div class="contact-panel">
+    <button class="contact-close" aria-label="Close">×</button>
+
+    <h3>Get in touch</h3>
+
+    <div class="contact-links">
+      <a
+  href="https://www.linkedin.com/in/YOUR_USERNAME"
+  target="_blank"
+  class="contact-item"
+  aria-label="LinkedIn"
+>
+  <span class="contact-icon">
+    <img src="linkedin.png" alt="" />
+  </span>
+
+  <span class="contact-text">LinkedIn</span>
+</a>
+      <a href="https://twitter.com/YOUR_USERNAME" target="_blank" class="contact-item">
+  <span class="contact-icon">
+    <img src="x.png" alt="" />
+  </span>
+  <span class="contact-text">X (Twitter)</span>
+</a>
+
+<a href="https://discord.gg/YOUR_INVITE" target="_blank" class="contact-item">
+  <span class="contact-icon">
+    <img src="discord.png" alt="" />
+  </span>
+  <span class="contact-text">Discord</span>
+</a>
+    </div>
+  </div>
+</div>
 </body>
 </html>

@@ -1,14 +1,36 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "@studio-freight/lenis";
-
+import { initThree, startThree, stopThree } from "./threejs/main.js";
+window.startThree = startThree;
+window.stopThree = stopThree;
 gsap.registerPlugin(ScrollTrigger);
 
 document.addEventListener("DOMContentLoaded", () => {
-
+    initThree();
     // ─── LENIS ────────────────────────────────────────────────
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
+    // Lock vh at the LARGEST possible value (URL bar hidden) so GSAP never
+    // recomputes when the URL bar toggles — that's what causes the lift jump.
+    // We read innerHeight once after a short delay so the browser has settled.
+    let lockedVH = window.innerHeight;
+
+    function updateVH() {
+        // Only update on true orientation/resize, not URL bar hide/show
+        const newH = window.innerHeight;
+        // URL bar toggling changes height by < 100px; orientation flips by much more
+        if (Math.abs(newH - lockedVH) > 100) {
+            lockedVH = newH;
+            ScrollTrigger.refresh(true);
+        }
+        document.documentElement.style.setProperty("--vh", `${lockedVH}px`);
+    }
+
+    updateVH();
+    window.addEventListener("resize", updateVH);
+    // Do NOT listen to visualViewport resize — that fires on URL bar toggle
+    // and causes the exact jump we're trying to prevent
     const lenis = new Lenis({
     duration: isMobile ? 0.6 : 1.2,
     smooth: !isMobile,
@@ -33,10 +55,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const panelEducation  = document.getElementById("panel-education");
     const panelResume     = document.getElementById("panel-resume");
 
-    const skyContainerHeight = skyContainer.offsetHeight;
-    const viewportHeight =
-  window.visualViewport?.height || window.innerHeight;
-    const skyMoveDistance    = skyContainerHeight - viewportHeight;
+    let skyMoveDistance = 0;
+
+    function updateSkyMetrics() {
+        skyMoveDistance = skyContainer.offsetHeight - lockedVH;
+    }
+
+    updateSkyMetrics();
+    window.addEventListener("resize", updateSkyMetrics);
+    // No visualViewport listener here either
 
     // ─── INITIAL STATES ───────────────────────────────────────
     gsap.set(heroCopy,        { yPercent: 100, opacity: 0 });
@@ -79,7 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
             pointerEvents: opacity > 0.05 ? "auto" : "none"
         });
     }
-
     // ─── SCROLL TRIGGER ───────────────────────────────────────
     // Extended to 7× viewport to fit 3 panels between window-out and hero-copy.
     //
@@ -137,8 +163,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // ── Sky movement (original 1.3 multiplier kept) ───────
             gsap.set(skyContainer, {
-                y: -skyMoveDistance * progress * 1.3
-            });
+  y: -skyMoveDistance * progress * (isMobile ? 1.05 : 1.3)
+});
 
             // ── Panels over clouds ────────────────────────────────
             // Intro starts at 0.24 — just as the window finishes fading
@@ -178,7 +204,65 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         },
     });
-    
+     let resizeTimeout;
+        // Only refresh ScrollTrigger on true resize (orientation change etc.)
+        // URL bar toggle is < 100px difference — ignore those
+        let lastRefreshH = lockedVH;
+        window.addEventListener("resize", () => {
+            if (Math.abs(window.innerHeight - lastRefreshH) > 100) {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    lastRefreshH = window.innerHeight;
+                    ScrollTrigger.refresh(true);
+                }, 150);
+            }
+        });
+        const modal = document.querySelector(".contact-modal");
+const openBtn = document.querySelector(".contact-trigger");
+const closeBtn = document.querySelector(".contact-close");
+const backdrop = document.querySelector(".contact-backdrop");
+
+openBtn.addEventListener("click", () => {
+  modal.classList.add("active");
+  modal.setAttribute("aria-hidden", "false");
+});
+
+function closeModal() {
+  modal.classList.remove("active");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+closeBtn.addEventListener("click", closeModal);
+backdrop.addEventListener("click", closeModal);
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeModal();
+});
+const fadeOffset = isMobile ? 300 : 200;
+
+gsap.fromTo(
+  ".three-outro",
+  { opacity: 0 },
+  {
+    opacity: 1,
+    ease: "none",
+    scrollTrigger: {
+      trigger: ".three-outro",
+      start: `top bottom+=${fadeOffset}`,
+      end: "top top",
+      scrub: true
+    }
+  }
+);
+ScrollTrigger.create({
+  trigger: ".three-outro",
+  start: "top bottom",
+  end: "bottom top",
+  onEnter: () => window.startThree(),
+  onLeave: () => window.stopThree(),
+  onEnterBack: () => window.startThree(),
+  onLeaveBack: () => window.stopThree()
+});
 });
 
 // ─── GITHUB SECTION SCROLL-IN ─────────────────────────────

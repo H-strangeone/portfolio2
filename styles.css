@@ -4,7 +4,9 @@
   --light: #e3e3db;
   --dark:  #0f0f0f;
 }
-
+:root {
+  --vh: 100svh;
+}
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -27,12 +29,162 @@ p { font-size: 1.35rem; line-height: 1; }
 .hero {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: 100svh;          /* fallback */
+  height: var(--vh, 100svh); /* locked by JS — ignores URL bar */
   overflow: hidden;
   perspective: 1000px;
   color: var(--light);
+  background: var(--dark);
+}
+/* ─── CONTACT TRIGGER BUTTON ─── */
+.contact-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  width: auto;
+  position: relative;
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 10px;
+  color: #0f0f0f;
+  font-size: clamp(0.75rem, 1.8vw, calc(1.2rem * 4 / 3)); /* small on mobile, 4/3× on desktop */
+  font-family: "Instrument Serif", serif;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
 }
 
+.contact-trigger:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #b0b0b0;
+}
+
+.contact-trigger__icon {
+  font-size: 1em;
+  line-height: 1;
+  opacity: 0.6;
+}
+
+/* Push col all the way to the left edge */
+.hero-header .col:first-child {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding-left: 0;
+}
+
+.contact-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.contact-modal.active {
+  pointer-events: auto;
+}
+.contact-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10,10,10,0.45);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.contact-modal.active .contact-backdrop {
+  opacity: 1;
+}
+.contact-panel {
+  position: relative;
+  max-width: 320px;
+  margin: auto;
+  top: 50%;
+  transform: translateY(-50%) scale(0.96);
+
+  background: rgba(20,20,20,0.9);
+  border-radius: 16px;
+  padding: 1.5rem;
+
+  text-align: center;
+  color: var(--light);
+
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.contact-modal.active .contact-panel {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+.contact-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+/* Entire row */
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+
+  color: var(--light);
+  text-decoration: none;
+
+  background: rgba(255, 255, 255, 0.06);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.contact-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateX(2px);
+}
+
+/* Icon box */
+.contact-icon {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
+.contact-icon img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* Text */
+.contact-text {
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+  opacity: 0.9;
+}
+.contact-text::after {
+  content: " ↗";
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.contact-item:hover .contact-text::after {
+  opacity: 0.6;
+}
 /* ════════════════════════════════
    HERO LAYERS
 ════════════════════════════════ */
@@ -49,21 +201,29 @@ p { font-size: 1.35rem; line-height: 1; }
 .sky-container { height: 350svh; z-index: 1; }
 
 .window-container {
-  height: 100svh;
+  top: 0;
+  /* Overscan by 15% so URL bar reveal never shows a gap underneath */
+  height: calc(var(--vh, 100svh));
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom);
   z-index: 5;
+  background: var(--dark);
 }
 .window-container img {
-  width: 100%; height: 100%;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  min-width: 100%; min-height: 100%;
+  min-width: 100%;
+  min-height: 100%;
 }
 
 .hero-header {
-  height: 100svh;
-  padding: 2rem;
+  height: var(--vh, 100svh);
+  padding: 2rem 2rem 2rem 1.2rem;
   display: flex;
   transform-style: preserve-3d;
   z-index: 6;
@@ -78,12 +238,46 @@ p { font-size: 1.35rem; line-height: 1; }
   align-items: flex-end;
   text-align: right;
 }
+.social-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
 
+.social-item {
+  width: 28px;
+  height: 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(227, 227, 219, 0.3);
+  border-radius: 6px;
+
+  color: var(--light);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+
+  opacity: 0.7;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.social-item:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.social-item span {
+  pointer-events: none;
+}
 /* ════════════════════════════════
    CLOUD PANELS
 ════════════════════════════════ */
 .cloud-panel {
-  height: 100svh;
+  height: var(--vh, 100svh);
   z-index: 8;
   display: flex;
   align-items: center;
@@ -91,7 +285,36 @@ p { font-size: 1.35rem; line-height: 1; }
   opacity: 0;
   pointer-events: none;
 }
+.contact-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
 
+  background: none;
+  border: none;
+  color: var(--light);
+  font-size: 1.25rem;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.contact-close:hover {
+  opacity: 1;
+}
+
+
+.contact-links a {
+  color: var(--light);
+  text-decoration: none;
+  padding: 0.6rem;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  transition: background 0.2s ease;
+}
+
+.contact-links a:hover {
+  background: rgba(255,255,255,0.12);
+}
 .panel-inner {
   display: flex;
   flex-direction: column;
@@ -359,7 +582,7 @@ p { font-size: 1.35rem; line-height: 1; }
 .outro {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: 100svh;
   overflow: hidden;
   background: var(--dark);
 }
@@ -375,6 +598,21 @@ p { font-size: 1.35rem; line-height: 1; }
   .github-section   { padding: 3rem 5vw; }
   .hero {
     perspective: none;
+  }
+  
+  
+  .social-links {
+    gap: 1rem;
+  }
+  .social-item {
+    width: 24px;
+    height: 24px;
+    font-size: 0.6rem;
+  }
+  .contact-trigger {
+    padding: 7px 13px;
+    gap: 5px;
+    border-radius: 7px;
   }
 }
 
@@ -429,4 +667,45 @@ p { font-size: 1.35rem; line-height: 1; }
   font-size: 1rem;
   opacity: 0.5;
   margin-top: 1rem;
+}
+.three-outro {
+  position: relative;
+  height: 100vh;
+  background: #0f1115;
+  overflow: hidden;
+}
+
+#three-container {
+  width: 100%;
+  height: 100%;
+}
+
+.three-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0.6;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.three-arrow img {
+  width: 48px;
+  height: 48px;
+}
+
+.three-arrow:hover {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.three-arrow.left {
+  left: 32px;
+}
+
+.three-arrow.right {
+  right: 32px;
 }
