@@ -7,12 +7,12 @@ import cudaImg    from "../public/cuda.jpg";
 
 // ─── PROJECT DATA ─────────────────────────────────────────
 const PROJECTS = [
-  { image: rustImg,   title: "Project One",   sub: "Rust · Systems programming at its finest",   link: "https://github.com/H-strangeone/project-one" },
-  { image: rustImg,   title: "Project Two",   sub: "Rust · A fast CLI utility",                  link: "https://github.com/H-strangeone/project-two" },
-  { image: golangImg, title: "Project Three", sub: "Go · Scalable backend service",              link: "https://github.com/H-strangeone/project-three" },
-  { image: golangImg, title: "Project Four",  sub: "Go · REST API with auth",                   link: "https://github.com/H-strangeone/project-four" },
-  { image: pythonImg, title: "Project Five",  sub: "Python · Machine learning pipeline",        link: "https://github.com/H-strangeone/project-five" },
-  { image: cudaImg,   title: "Project Six",   sub: "CUDA · GPU-accelerated compute",            link: "https://github.com/H-strangeone/project-six" },
+  { image: rustImg,   title: "Rell",   sub: "Rust based shell",   link: "https://github.com/H-strangeone/rell.git" },
+  { image: rustImg,   title: "Serv fdpk",   sub: "This project is an experiment in rethinking how data moves and how search works on the internet or more specifically, building our own free, decentralized internet from first principles.",                  link: "https://github.com/H-strangeone/serv-fdpk.git" },
+  { image: golangImg, title: "CLI based TODO", sub: "todo but more and stricter",              link: "https://github.com/H-strangeone/todo.git" },
+  { image: golangImg, title: "distributed lan suite",  sub: "just started lets see where this goes",                   link: "https://github.com/H-strangeone/lan-suite.git" },
+  { image: pythonImg, title: "SBOM - TM",  sub: "SBOM-TM is a GitHub Action–based security tool that automatically scans your repository for software supply-chain risks using a Software Bill of Materials (SBOM).\nIt provides Dependabot-style security visibility, but for everything in your project — not just dependency updates.",        link: "https://github.com/H-strangeone/SBOM-TM.git" },
+  { image: cudaImg,   title: "Gpu programming for metaheuristics",   sub: "even i dont know what i am doing with this",            link: "" },
 ];
 
 const COUNT       = PROJECTS.length;
@@ -63,12 +63,13 @@ export function initThree() {
   // No THREE.Fog — we handle edge darkening via CSS vignette
 
   // ── CAMERA ───────────────────────────────────────────────
+  const isMobileThree = window.innerWidth <= 768;
   camera = new THREE.PerspectiveCamera(
-    60,
+    isMobileThree ? 80 : 60,          // wider FOV on mobile = cards look smaller / fit better
     container.clientWidth / container.clientHeight,
     0.1, 100
   );
-  camera.position.set(0, 0.5, 0);
+  camera.position.set(0, 0.5, isMobileThree ? 2 : 0); // pull camera back a bit on mobile
 
   // ── RENDERER ─────────────────────────────────────────────
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -171,9 +172,25 @@ export function initThree() {
     window.open(hoveredCard.userData.link, "_blank");
   });
 
-  // Touch
+  // Touch — track start so we can distinguish tap from long-press / scroll
+  let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+
+  container.addEventListener("touchstart", (e) => {
+    const t = e.touches[0];
+    touchStartX    = t.clientX;
+    touchStartY    = t.clientY;
+    touchStartTime = Date.now();
+  }, { passive: true });
+
   container.addEventListener("touchend", (e) => {
     const t = e.changedTouches[0];
+
+    // Ignore long-presses (> 300 ms) and any gesture that moved more than 10 px
+    const elapsed  = Date.now() - touchStartTime;
+    const dx       = Math.abs(t.clientX - touchStartX);
+    const dy       = Math.abs(t.clientY - touchStartY);
+    if (elapsed > 300 || dx > 10 || dy > 10) return;
+
     const r = container.getBoundingClientRect();
     const tm = new THREE.Vector2(
       ((t.clientX - r.left) / r.width)  * 2 - 1,
@@ -192,7 +209,10 @@ export function initThree() {
   });
 
   window.addEventListener("resize", () => {
+    const mob = window.innerWidth <= 768;
+    camera.fov    = mob ? 80 : 60;
     camera.aspect = container.clientWidth / container.clientHeight;
+    camera.position.z = mob ? 2 : 0;
     camera.updateProjectionMatrix();
     renderer.setSize(container.clientWidth, container.clientHeight);
   });
@@ -307,7 +327,7 @@ function buildDomOverlay(container) {
     text-shadow: 0 1px 12px rgba(0,0,0,0.6);
     transition: opacity 0.35s ease, transform 0.35s ease;
   `;
-
+  domSub.style.whiteSpace = "pre-line";
   container.appendChild(domTitle);
   container.appendChild(domSub);
 }

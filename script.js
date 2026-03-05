@@ -11,19 +11,28 @@ document.addEventListener("DOMContentLoaded", () => {
     // ─── LENIS ────────────────────────────────────────────────
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
-    // Lock vh at the LARGEST possible value (URL bar hidden) so GSAP never
-    // recomputes when the URL bar toggles — that's what causes the lift jump.
-    // We read innerHeight once after a short delay so the browser has settled.
-    let lockedVH = window.innerHeight;
+    // ── Lock --vh to the MAXIMUM possible viewport height immediately.
+    // On mobile, window.innerHeight shrinks when the URL bar is visible.
+    // We want the LARGEST value (URL bar hidden) so the hero never shifts.
+    // Strategy: use screen.height as an upper bound — it's always >= innerHeight
+    // regardless of URL bar state.
+    function getMaxVH() {
+        const screenH = window.screen?.height ?? window.innerHeight;
+        const innerH  = window.innerHeight;
+        return Math.max(screenH, innerH);
+    }
+
+    let lockedVH = getMaxVH();
 
     function updateVH() {
-        // Only update on true orientation/resize, not URL bar hide/show
         const newH = window.innerHeight;
-        // URL bar toggling changes height by < 100px; orientation flips by much more
-        if (Math.abs(newH - lockedVH) > 100) {
-            lockedVH = newH;
+        // Only re-lock on true orientation changes (> 18% height change).
+        // URL bar toggling is ~50-100px; orientation flips are 200px+.
+        if (Math.abs(newH - lockedVH) > lockedVH * 0.18) {
+            lockedVH = getMaxVH();
             ScrollTrigger.refresh(true);
         }
+        // Always write the LOCKED value — never the shrunken URL-bar value.
         document.documentElement.style.setProperty("--vh", `${lockedVH}px`);
     }
 
